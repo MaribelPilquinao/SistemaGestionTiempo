@@ -6,6 +6,8 @@ class Administrador(Usuario):
         
     def asignar_fechas_registro(self):
         pass
+        #for colaborador in colaboradores:
+         #   if fecha not in colaborador.fechas_asignadas:
     
     def generar_reporte(self):
         pass
