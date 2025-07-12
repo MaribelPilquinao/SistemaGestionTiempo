@@ -1,15 +1,19 @@
 from usuario import Usuario
 
 class Administrador(Usuario):
-    def __init__(self, id, nombre, apellido, correo):
-        super().__init__(id, nombre, apellido, correo, rol='administrador')
+    def __init__(self, id, nombre, apellido, correo, clave):
+        super().__init__(id, nombre, apellido, correo, clave, rol='administrador')
         
-    def asignar_fechas_registro(self):
-        pass
-        #for colaborador in colaboradores:
-         #   if fecha not in colaborador.fechas_asignadas:
+    def asignar_fechas_registro(self, colaboradores, fecha):
+        for colaborador in colaboradores:
+            colaborador.asignar_fecha(fecha)
+        print(f'Fecha: {fecha} asignada a todos los colaboradores.')
     
-    def generar_reporte(self):
-        pass
+    def generar_reporte(self, colaboradores):
+        print('Reporte de actividades por colaborador: ')
+        for colaborador in colaboradores:
+            actividades = colaborador.get_actividades()
+            total_horas = sum(act.calcular_duracion() for act in actividades)
+            print(f'{colaborador.get_nombre()} {colaborador.get_apellido()}: {total_horas:.2f} horas')
     
     
