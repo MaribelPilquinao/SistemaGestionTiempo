@@ -50,7 +50,8 @@ class SistemaGestorTiempo:
                     fecha
                 )
             elif opcion == '3':
-                admin.generar_reporte([u for u in self.usuarios if u.get_rol() == 'colaborador'])
+                # admin.generar_reporte([u for u in self.usuarios if u.get_rol() == 'colaborador'])
+                self.exportar_resumen_proyecto_excel()
             elif opcion == '4':
                 for p in self.proyectos:
                     p.mostrar_resumen()
@@ -84,12 +85,38 @@ class SistemaGestorTiempo:
                 print("Opción inválida.")
 
     def crear_proyecto(self):
-        id = input("ID del proyecto: ")
+        while True:
+            id = input('Ingrese el id del nuevo proyecto: ')
+            
+            if any(p.get_id() == id for p in self.proyectos):
+                print(f'Ya existe el id asignado al proyecto. Intenta de nuevamente')
+            else:
+                break
+            
         nombre = input("Nombre del proyecto: ")
         descripcion = input("Descripción: ")
         proyecto = Proyecto(id, nombre, descripcion)
         self.proyectos.append(proyecto)
         print(f"Proyecto '{nombre}' creado correctamente.")
+        
+    def exportar_resumen_proyecto_excel(self):
+        if not self.proyectos:
+            print("No hay proyectos disponibles.")
+            return
+    
+        print("\nProyectos:")
+        for i, proyecto in enumerate(self.proyectos):
+            print(f"{i + 1}. {proyecto.get_nombre()}")
+    
+        try:
+            idx = int(input("Seleccione el número del proyecto: ")) - 1
+            if 0 <= idx < len(self.proyectos):
+                self.proyectos[idx].exportar_resumen_excel()
+            else:
+                print("selección inválida.")
+        except Exception as e:
+            print(f"Error: {e}")
+
 
     def registrar_actividad(self, colaborador):
         try:

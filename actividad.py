@@ -20,6 +20,7 @@ class Actividad:
             return duracion.total_seconds() / 3600
         except Exception as e:
             print(f'Error al calcular duracion: {e}')
+            return 0
             
     #getters
     def get_id(self):
@@ -46,7 +47,7 @@ class Actividad:
     def get_usuario(self):
         return self.__usuario
         
-    def get_is_active(self):
+    def esta_activa(self):
         return self.__esta_activo
         
     #elminar la logica
