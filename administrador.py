@@ -8,6 +8,10 @@ class Administrador(Usuario):
         for colaborador in colaboradores:
             colaborador.asignar_fecha(fecha)
         print(f'Fecha: {fecha} asignada a todos los colaboradores.')
+        
+    def asignar_fecha_por_colaborador(self, colaborador, fecha):
+        colaborador.asignar_fecha(fecha)
+        print(f"Fecha {fecha} asignada a {colaborador.get_nombre()} {colaborador.get_apellido()}.")
     
     def generar_reporte(self, colaboradores):
         print('Reporte de actividades por colaborador: ')

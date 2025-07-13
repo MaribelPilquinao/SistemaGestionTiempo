@@ -34,10 +34,11 @@ class SistemaGestorTiempo:
         while True:
             print("\n--- MENÚ ADMINISTRADOR ---")
             print("1. Crear proyecto")
-            print("2. Asignar fechas de registro")
-            print("3. Generar reporte de actividades")
-            print("4. Ver resumen de proyectos")
-            print("5. Asignar colaborador a proyecto")
+            print("2. Asignar fechas de registro a todos los colaboradores")
+            print("3. Asignar fechas de registro por colaborador")
+            print("4. Generar reporte de actividades Excel")
+            print("5. Ver resumen de proyectos")
+            print("6. Asignar colaborador a proyecto")
             print("0. Salir")
             opcion = input("Seleccione una opción: ")
 
@@ -50,12 +51,31 @@ class SistemaGestorTiempo:
                     fecha
                 )
             elif opcion == '3':
+                colaboradores = [u for u in self.usuarios if u.get_rol() == 'colaborador']
+                if not colaboradores:
+                    print("No hay colaboradores disponibles.")
+                    return
+
+                print("Seleccione un colaborador:")
+                for i, colab in enumerate(colaboradores):
+                    print(f"{i + 1}. {colab.get_nombre()} {colab.get_apellido()}")
+
+                try:
+                    idx = int(input("Número de colaborador: ")) - 1
+                    if 0 <= idx < len(colaboradores):
+                        fecha = input("Ingrese la fecha (YYYY-MM-DD): ")
+                        admin.asignar_fecha_por_colaborador(colaboradores[idx], fecha)
+                    else:
+                        print("Número inválido.")
+                except Exception as e:
+                    print(f"Error: {e}")
+            elif opcion == '4':
                 # admin.generar_reporte([u for u in self.usuarios if u.get_rol() == 'colaborador'])
                 self.exportar_resumen_proyecto_excel()
-            elif opcion == '4':
+            elif opcion == '5':
                 for p in self.proyectos:
                     p.mostrar_resumen()
-            elif opcion == '5':
+            elif opcion == '6':
                 self.asignar_colaborador_a_proyecto()
             elif opcion == '0':
                 print("Saliendo del sistema...")
@@ -185,7 +205,14 @@ class SistemaGestorTiempo:
         if os.path.exists(archivo):
             with open(archivo, 'rb') as f:
                 print("Cargando datos guardados...")
-                return pickle.load(f)
+                sistema = pickle.load(f)
+
+                usuarios_unicos = {}
+                for u in sistema.usuarios:
+                    usuarios_unicos[u.get_correo()] = u
+                sistema.usuarios = list(usuarios_unicos.values())
+
+            return sistema
         else:
             print("No se encontraron datos previos, iniciando sistema nuevo.")
             return SistemaGestorTiempo()
