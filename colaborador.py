@@ -20,7 +20,7 @@ class Colaborador(Usuario):
             return
         print(f'historial de {self.get_nombre()} {self.get_apellido()}')
         for act in self.__actividades:
-            print(f'- {act.get_fecha()} | {act.get_descripcion()} | {act.get_proyecto().get_nombre()} | {act.calcular_duracion():2.f}h')
+            print(f'- {act.get_fecha()} | {act.get_descripcion()} | {act.get_proyecto().get_nombre()} | {act.calcular_duracion():.2f}h')
         
     def ver_fechas_asignadas(self):
         if not self.__fechas_asignadas:

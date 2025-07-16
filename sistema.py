@@ -2,10 +2,9 @@ from colaborador import Colaborador
 from administrador import Administrador
 from actividad import Actividad
 from proyecto import Proyecto
-from datetime import date, time
+from datetime import date, time, datetime
 import pickle
 import os
-
 
 
 class SistemaGestorTiempo:
@@ -21,7 +20,7 @@ class SistemaGestorTiempo:
             if usuario.login(correo, clave):
                 print(f'\n Bienvenido, {usuario.get_nombre()} {usuario.get_apellido()} ({usuario.get_rol()})\n')
                 return usuario
-        print('usuario no encontrado o clave incorrecta.\n')
+        print('Usuario no encontrado o clave incorrecta.\n')
         return None
 
     def mostrar_menu(self, usuario):
@@ -45,11 +44,15 @@ class SistemaGestorTiempo:
             if opcion == '1':
                 self.crear_proyecto()
             elif opcion == '2':
-                fecha = input("Ingrese la fecha a asignar (YYYY-MM-DD): ")
-                admin.asignar_fechas_registro(
-                    [u for u in self.usuarios if u.get_rol() == 'colaborador'],
-                    fecha
-                )
+                fecha_actual = datetime.now().strftime('%d-%m-%Y')
+                fecha_inicio = input(f"Fecha de inicio [{fecha_actual}]: ") or fecha_actual
+                fecha_fin = input("Fecha de fin (opcional): ")
+                rango_fechas = [fecha_inicio, fecha_fin] if fecha_fin.strip() else [fecha_inicio]
+                colaboradores = [u for u in self.usuarios if u.get_rol() == 'colaborador']
+                for colaborador in colaboradores:
+                    for f in rango_fechas:
+                        colaborador.asignar_fecha(f)
+                print(f"Fechas {', '.join(rango_fechas)} asignadas a todos los colaboradores.")
             elif opcion == '3':
                 colaboradores = [u for u in self.usuarios if u.get_rol() == 'colaborador']
                 if not colaboradores:
@@ -63,18 +66,23 @@ class SistemaGestorTiempo:
                 try:
                     idx = int(input("Número de colaborador: ")) - 1
                     if 0 <= idx < len(colaboradores):
-                        fecha = input("Ingrese la fecha (YYYY-MM-DD): ")
+                        fecha = input("Ingrese la fecha (DD-MM-YYYY): ")
                         admin.asignar_fecha_por_colaborador(colaboradores[idx], fecha)
                     else:
                         print("Número inválido.")
                 except Exception as e:
                     print(f"Error: {e}")
             elif opcion == '4':
-                # admin.generar_reporte([u for u in self.usuarios if u.get_rol() == 'colaborador'])
                 self.exportar_resumen_proyecto_excel()
             elif opcion == '5':
-                for p in self.proyectos:
+                if not self.proyectos:
+                    print("No hay proyectos activos.")
+                    return
+                print("\n=== PROYECTOS ACTIVOS ===")
+                for idx, p in enumerate(self.proyectos, start=1):
+                    print(f"\n--- Proyecto # {idx} ---")
                     p.mostrar_resumen()
+                    print('-' * 30)
             elif opcion == '6':
                 self.asignar_colaborador_a_proyecto()
             elif opcion == '0':
@@ -105,38 +113,31 @@ class SistemaGestorTiempo:
                 print("Opción inválida.")
 
     def crear_proyecto(self):
-        while True:
-            id = input('Ingrese el id del nuevo proyecto: ')
-            
-            if any(p.get_id() == id for p in self.proyectos):
-                print(f'Ya existe el id asignado al proyecto. Intenta de nuevamente')
-            else:
-                break
-            
+        nuevo_id = str(len(self.proyectos) + 1)
+        print(f"ID del proyecto: {nuevo_id}")
         nombre = input("Nombre del proyecto: ")
         descripcion = input("Descripción: ")
-        proyecto = Proyecto(id, nombre, descripcion)
+        proyecto = Proyecto(nuevo_id, nombre, descripcion)
         self.proyectos.append(proyecto)
         print(f"Proyecto '{nombre}' creado correctamente.")
-        
+
     def exportar_resumen_proyecto_excel(self):
         if not self.proyectos:
             print("No hay proyectos disponibles.")
             return
-    
+
         print("\nProyectos:")
         for i, proyecto in enumerate(self.proyectos):
             print(f"{i + 1}. {proyecto.get_nombre()}")
-    
+
         try:
             idx = int(input("Seleccione el número del proyecto: ")) - 1
             if 0 <= idx < len(self.proyectos):
                 self.proyectos[idx].exportar_resumen_excel()
             else:
-                print("selección inválida.")
+                print("Selección inválida.")
         except Exception as e:
             print(f"Error: {e}")
-
 
     def registrar_actividad(self, colaborador):
         try:
@@ -149,7 +150,7 @@ class SistemaGestorTiempo:
 
             print("Proyectos disponibles:")
             for i, p in enumerate(self.proyectos):
-                print(f"{i+1}. {p.get_nombre()}")
+                print(f"{i + 1}. {p.get_nombre()}")
             idx = int(input("Seleccione el número de proyecto: ")) - 1
             proyecto = self.proyectos[idx]
 
@@ -169,8 +170,8 @@ class SistemaGestorTiempo:
             self.actividades.append(actividad)
 
         except Exception as e:
-            print(f"error al registrar actividad: {e}")
-            
+            print(f"Error al registrar actividad: {e}")
+
     def asignar_colaborador_a_proyecto(self):
         if not self.proyectos:
             print("No hay proyectos disponibles.")
@@ -216,3 +217,4 @@ class SistemaGestorTiempo:
         else:
             print("No se encontraron datos previos, iniciando sistema nuevo.")
             return SistemaGestorTiempo()
+
